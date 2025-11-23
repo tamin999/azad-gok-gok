@@ -1,133 +1,138 @@
+const fs = require("fs-extra");
+const path = require("path");
+const axios = require("axios");
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
 
-// Rotate images 
-let imageIndex = 0;
-const images = [
-"https://files.catbox.moe/m77sfn.gif",
-"https://files.catbox.moe/i9etjw.gif",
-"https://i.imgur.com/s1z38No.jpg",
-"https://files.catbox.moe/3fp3vf.gif"
-];
-
-// Fancy small-caps mapping
-const fancyMap = {
-a: 'ᴀ', b: 'ʙ', c: 'ᴄ', d: 'ᴅ', e: 'ᴇ', f: 'ꜰ', g: 'ɢ', h: 'ʜ', i: 'ɪ',
-j: 'ᴊ', k: 'ᴋ', l: 'ʟ', m: 'ᴍ', n: 'ɴ', o: 'ᴏ', p: 'ᴘ', q: 'ǫ', r: 'ʀ',
-s: 'ꜱ', t: 'ᴛ', u: 'ᴜ', v: 'ᴠ', w: 'ᴡ', x: 'ˣ', y: 'ʏ', z: 'ᴢ'
-};
-
-// Convert normal string to fancy small-caps
-function toFancySmallCaps(str) {
-return str.split("").map(c => fancyMap[c.toLowerCase()] || c).join("");
-}
-
-// 🔓 Role text helper
-function roleTextToString(role) {
-switch (role) {
-case 0: return "Everyone";
-case 1: return "Group Admin";
-case 2: return "Bot Admin";
-case 3: return "Super Admin";
-default: return role.toString();
-}
-}
+const gifUrl = "https://files.catbox.moe/5z7z4t.gif"; 
 
 module.exports = {
-config: {
-name: "help",
-version: "1.0",
-author: "Az ad 💥", //author change korle tor marechudi 
-countDown: 5,
-role: 0,
-shortDescription: { en: "Show all commands (Stylish SMS Style)" },
-longDescription: { en: "Display all commands in a stylish bordered list" },
-category: "system"
-},
+  config: {
+    name: "help",
+    version: "1.2",
+    author: "Azadx69x",//author change korle tor marechudi 
+    countDown: 5,
+    role: 0,
+    description: { en: "View command usage" },
+    category: "info"
+  },
 
-onStart: async function ({ message, args, event }) {
-const prefix = getPrefix(event.threadID);
+  onStart: async function({ message, args, event, role }) {
+    const prefix = getPrefix(event.threadID);
+    const commandName = (args[0] || "").toLowerCase();
+    const cmd = commands.get(commandName) || commands.get(aliases.get(commandName));
 
-// Rotate image      
-const currentImage = images[imageIndex];      
-imageIndex = (imageIndex + 1) % images.length;  
+    function roleTextToString(role) {
+      return role === 0 ? "🔓 All Users"
+        : role === 1 ? "🛡 Group Admins"
+        : "👑 Bot Admins";
+    }
 
-// Command-specific info      
-if (args[0]) {      
-  const cmdName = args[0].toLowerCase();      
-  const aliasTarget = aliases.get(cmdName);    
-  const command = commands.get(cmdName) || (aliasTarget && commands.get(aliasTarget));    
-  if (!command) return message.reply(`💀👻 No such command: ${cmdName}`);      
+    async function getGifAttachment(url) {
+      const filePath = path.join(__dirname, "temp_gif.gif");
+      if (!fs.existsSync(filePath)) {
+        const res = await axios.get(url, { responseType: "arraybuffer" });
+        fs.writeFileSync(filePath, Buffer.from(res.data));
+      }
+      return [fs.createReadStream(filePath)];
+    }
 
-  const { name, author, shortDescription, version, role } = command.config;      
-  const desc = shortDescription?.en || "No description";      
-  const usage = `Use: ${prefix}${name}`;      
-  const infoBox = `╭───⊙
+    const headerMsg = `💎 Total Commands: ${commands.size}
+🔰 Prefix: '${prefix}'
+👤 Developer: Az ad 👻🩸
+💡 Tip: Type '${prefix}help <command>' for detailed info.\n\n`;
 
-│ ☢️ ${toFancySmallCaps(name)}
-├── INFO
-│ 📝 Description: ${desc}
-│ 🗿 Author: ${author || "Unknown"}
-│ ⚙️ Guide: ${usage}
-├── USAGE
-│ 💠 Version: ${version || "1.0"}
-│ 🔐 Role: ${roleTextToString(role)}
-╰────────────⊙`;
+    if (cmd) {
+      const cfg = cmd.config;
+      const name = cfg.name;
+      const desc = typeof cfg.description === "string" ? cfg.description : cfg.description?.en || "No description";
+      const author = cfg.author || "Unknown";
+      const guideBody = typeof cfg.guide?.en === "string" ? cfg.guide.en.replace(/\{pn\}/g, prefix + name) : "No usage info";
+      const version = cfg.version || "1.0";
+      const roleOfCommand = cfg.role || 0;
+      const aliasesString = cfg.aliases ? cfg.aliases.join(", ") : "None";
+      const cooldown = cfg.countDown || 1;
+      const category = cfg.category || "Uncategorized";
 
-return message.reply({      
-    body: infoBox,      
-    attachment: await global.utils.getStreamFromURL(currentImage)      
-  });      
-}      
+      const msg = `${headerMsg}╭───⊙
+│ 💠 Command: ${name}
+│ 📝 Desc: ${desc}
+│ 🗿 Author: ${author}
+│ ⚙️ Guide: ${guideBody}
+│ 🌀 Version: ${version}
+│ 🔐 Role: ${roleTextToString(roleOfCommand)}
+│ 🏷️ Aliases: ${aliasesString}
+│ ⏱️ Cooldown: ${cooldown}s
+│ 🗂️ Category: ${category}
+╰──────────────⊙`;
 
-// Categorize commands      
-const categories = {};      
-for (const [name, cmd] of commands) {      
-  const cat = cmd.config.category || "Uncategorized";      
-  if (!categories[cat]) categories[cat] = [];      
-  categories[cat].push(name);      
-}      
+      const attachments = await getGifAttachment(gifUrl);
+      return message.reply({ body: msg, attachment: attachments });
+    }
 
-// Nezuko header with sparkles      
-const sparkles = ["✦", "✧", "✰"];      
-const randSparkle = () => sparkles[Math.floor(Math.random() * sparkles.length)];      
-let msg = `╔════════════════════════╗
+    const page = parseInt(args[0]) || 1;
+    const numberOfOnePage = 10;
 
-💫  🪽°${toFancySmallCaps("Nezuko Chan")}°🐰 ${randSparkle()} ${randSparkle()} ${randSparkle()}
-╚════════════════════════╝\n`;
+    const categories = {};
+    for (const [, value] of commands) {
+      if (value.config.role > 1 && role < value.config.role) continue;
+      const cat = value.config.category || "Uncategorized";
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push({
+        name: value.config.name,
+        desc: typeof value.config.description === "string"
+          ? value.config.description
+          : value.config.description?.en || "No description",
+        role: value.config.role || 0,
+        aliases: value.config.aliases ? value.config.aliases.join(", ") : "None",
+        cooldown: value.config.countDown || 1,
+        version: value.config.version || "1.0"
+      });
+    }
 
-// List commands by category      
-const maxCategoryLength = Math.max(...Object.values(categories).map(c => c.length), 1);    
-for (const category of Object.keys(categories).sort()) {      
-  const cmds = categories[category].sort();      
-  const barLength = 10;      
-  const filled = Math.min(barLength, Math.ceil((cmds.length / maxCategoryLength) * barLength));      
-  const empty = barLength - filled;      
-  const bar = `➪${"▮".repeat(filled)}${"▭".repeat(empty)}৺`;      
+    const categoryNames = Object.keys(categories).sort();
+    const allCommands = [];
+    for (const cat of categoryNames) {
+      for (const cmd of categories[cat]) {
+        allCommands.push({ ...cmd, category: cat });
+      }
+    }
 
-  msg += `\n╭─🌈 ${toFancySmallCaps("Category")}: ${toFancySmallCaps(category)} ─╮\n`;      
-  msg += `${bar}\n`;      
-  const bullets = ["〄", "✦", "💥", "🧬"];      
-  cmds.forEach((c, i) => {      
-    const bullet = bullets[i % bullets.length];      
-    msg += `   ${bullet} ${toFancySmallCaps(c)}\n`;      
-  });      
-  msg += `╰${"─".repeat(36)}╯\n`;      
-}      
+    if (!allCommands.length) return message.reply("⚠️ No commands available.");
 
-// Footer with total commands, prefix, and dev info      
-msg += `\n╔════════════════════════════╗
+    const totalPage = Math.ceil(allCommands.length / numberOfOnePage);
+    if (page < 1 || page > totalPage)
+      return message.reply(`⚠️ Page ${page} does not exist. Only ${totalPage} pages.`);
 
-💎 Total Commands: ${commands.size}
-🔰 Prefix: ${prefix}
-👤 Dev: Az ad 👻🩸
-💡 Tip: Type '${prefix}help [command]' for detailed info.
-╚════════════════════════════╝`;
+    const start = (page - 1) * numberOfOnePage;
+    const commandsToShow = allCommands.slice(start, start + numberOfOnePage);
 
-await message.reply({      
-  body: msg,      
-  attachment: await global.utils.getStreamFromURL(currentImage)      
-});
+    let msg = headerMsg;
+    let lastCategory = "";
 
-}
+    for (const cmd of commandsToShow) {
+      if (cmd.category !== lastCategory) {
+        const emoji = cmd.category.toLowerCase().includes("music") ? "🎵"
+          : cmd.category.toLowerCase().includes("info") ? "🛠"
+          : "🌀";
+        msg += `╭───⊙ ${emoji} ${cmd.category.toUpperCase()} ⭓\n`;
+        lastCategory = cmd.category;
+      }
+
+      msg += `│ 💠 ${cmd.name}\n`;
+      msg += `│ 📝 ${cmd.desc}\n`;
+      msg += `│ 🔐 Role: ${roleTextToString(cmd.role)}\n`;
+      msg += `│ 🏷️ Aliases: ${cmd.aliases}\n`;
+      msg += `│ ⏱️ Cooldown: ${cmd.cooldown}s\n`;
+      msg += `│ 🌀 Version: ${cmd.version}\n`;
+      msg += `├──────────────⊙\n`;
+    }
+
+    msg += `│ 📄 Page: ${page}/${totalPage}\n`;
+    msg += `│ 💬 Use ${prefix}help <page> to see more\n`;
+    msg += `╰──────────────⊙`;
+
+    const attachments = await getGifAttachment(gifUrl);
+    return message.reply({ body: msg, attachment: attachments });
+  }
 };
