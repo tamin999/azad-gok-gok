@@ -6,7 +6,7 @@ module.exports.config = {
   aliases:["fcp"],
   version: "6.9",
   role: 0,
-  author: "Dipto",
+  author: "DiPto",
   description: "Facebook cover",
   category: "logo",
   guide: {
