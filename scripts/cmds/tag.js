@@ -1,44 +1,49 @@
 module.exports = {
   config: {
     name: "tag",
-    version: "1.0",
-    author: "saidul",
-    countDown: 5,
+    version: "1.1",
+    author: "Arijit",
+    countDown: 3,
     role: 0,
-    shortDescription: {
-      en: "Tag members by name"
-    },
-    longDescription: {
-      en: "Mention group members by matching name"
-    },
-    category: "group",
+    shortDescription: "Tag mentioned or replied user",
+    longDescription: "Tag a user by mention or by replying to their message with an optional message.",
+    category: "utility",
     guide: {
-      en: "{pn} [name]"
+      en: "{pn} [@mention or reply] [optional message]"
     }
   },
 
   onStart: async function ({ api, event, args }) {
-    const name = args.join(" ");
-    if (!name) return api.sendMessage("⚠️ Please provide a name to tag.", event.threadID, event.messageID);
+    let targetID;
+    let tagName;
 
-    const threadInfo = await api.getThreadInfo(event.threadID);
-    const members = threadInfo.userInfo;
-    const matches = members.filter(user => 
-      user.name && user.name.toLowerCase().includes(name.toLowerCase())
-    );
+    // Replied user
+    if (event.type === "message_reply") {
+      targetID = event.messageReply.senderID;
+      tagName = event.messageReply.senderID;
+    }
 
-    if (matches.length === 0)
-      return api.sendMessage(`❌ No members found matching "${name}".`, event.threadID, event.messageID);
+    // Mentioned user
+    else if (Object.keys(event.mentions).length > 0) {
+      targetID = Object.keys(event.mentions)[0];
+      tagName = event.mentions[targetID];
+    }
 
-    const mentions = matches.map(user => ({
-      tag: user.name,
-      id: user.id
-    }));
+    // No target
+    else {
+      return api.sendMessage("❌ | Please mention a user or reply to someone's message.", event.threadID);
+    }
 
-    const taggedNames = matches.map(user => user.name).join(", ");
-    return api.sendMessage({
-      body: `🔖 Tagging: ${taggedNames}`,
-      mentions
-    }, event.threadID, event.messageID);
+    // Message body
+    const customMsg = args.join(" ") || "👋 Hey there!";
+    const msg = {
+      body: customMsg,
+      mentions: [{
+        tag: typeof tagName === "string" ? tagName : "User",
+        id: targetID
+      }]
+    };
+
+    return api.sendMessage(msg, event.threadID);
   }
 };
