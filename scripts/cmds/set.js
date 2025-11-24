@@ -1,7 +1,7 @@
 module.exports = {
   config: {
     name: "set",
-    aliases: ['ap'],
+    aliases: ['a'],
     version: "1.0",
     author: "♡︎ 𝐻𝐴𝑆𝐴𝑁 ♡︎",
     role: 0,
