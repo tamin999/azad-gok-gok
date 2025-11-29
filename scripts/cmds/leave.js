@@ -7,7 +7,7 @@ module.exports = {
     name: "leave",
     aliases: ["l"],
     version: "2.0", 
-    author: "Vex_Kshitiz",
+    author: "VexKshitiz",
     countDown: 5,
     role: 2,
     shortDescription: "Bot will leave a group chat",
