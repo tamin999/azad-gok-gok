@@ -21,16 +21,14 @@ module.exports = {
 
     if (!keyword)
       return api.sendMessage(
-`╔══ ❗ 𝗞𝗘𝗬𝗪𝗢𝗥𝗗 𝗡𝗘𝗬𝗘𝗡 ══╗
-👉 Example: /segs mia khalifa
-╚═══════════════════╝`,
+`❗ 𝗞𝗘𝗬𝗪𝗢𝗥𝗗
+      👉 Example: /segs mia khalifa`,
         thread
       );
 
     api.sendMessage(
-`╔══ 🔍 𝗦𝗘𝗔𝗥𝗖𝗛𝗜𝗡𝗚...══╗
-      Please wait...
-╚════════════════╝`,
+`🔍 𝗦𝗘𝗔𝗥𝗖𝗛𝗜𝗡𝗚...
+      Please wait...`,
       thread
     );
 
@@ -43,9 +41,8 @@ module.exports = {
 
       if (!results.length)
         return api.sendMessage(
-`╔══ ❌ 𝗡𝗢 𝗥𝗘𝗦𝗨𝗟𝗧 ══╗
-Video paowa gelo na!
-╚═════════════════╝`,
+`❌ 𝗡𝗢 𝗥𝗘𝗦𝗨𝗟𝗧
+Video paowa gelo na!`,
           thread
         );
       
@@ -60,9 +57,8 @@ Video paowa gelo na!
 
     } catch (e) {
       api.sendMessage(
-`╔══ ❌ 𝗘𝗥𝗥𝗢𝗥 ══╗
-Search error!
-╚═════════════╝`,
+`❌ 𝗘𝗥𝗥𝗢𝗥
+Search error!`,
         thread
       );
     }
@@ -78,9 +74,8 @@ Search error!
     if (Date.now() > userSession[sender].expires) {
       delete userSession[sender];
       return api.sendMessage(
-`╔══ ⏳ 𝗧𝗜𝗠𝗘 𝗢𝗨𝗧 ══╗
-   Abar )segs use korun.
-╚═════════════╝`,
+`⏳ 𝗧𝗜𝗠𝗘 𝗢𝗨𝗧
+   Abar )segs use korun.`,
         thread
       );
     }
