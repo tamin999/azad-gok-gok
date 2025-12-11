@@ -9,11 +9,10 @@ module.exports = {
         author: "Azadx69",
         role: 0,
         shortDescription: "Banking System",
-        longDescription: "Full banking with ATM card generator, transactions, and multiple designs with professional layout.",
+        longDescription: "Full banking with ATM card generator, multiple designs with professional layout.",
         category: "finance",
     },
-
-    // ------------------------ UTIL FUNCTIONS ------------------------
+  
     formatMoney(amount) {
         if (isNaN(amount)) return "0";
         amount = Number(amount);
@@ -68,28 +67,24 @@ module.exports = {
             hologramColors: ["#ff4500", "#ff6347"],
         }
     },
-
-    // ------------------------ CARD GENERATOR ------------------------
+  
     async createRealCard(card, username, balance, transactions = [], design = "default") {
         const width = 900, height = 540;
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext("2d");
         const d = this.cardDesigns[design] || this.cardDesigns.default;
-
-        // Background
+      
         const bg = ctx.createLinearGradient(0, 0, width, height);
         bg.addColorStop(0, d.gradient[0]);
         bg.addColorStop(0.5, d.gradient[1]);
         bg.addColorStop(1, d.gradient[2]);
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, width, height);
-
-        // Card Title
+      
         ctx.font = "48px sans-serif";
         ctx.fillStyle = "white";
         ctx.fillText("Premium Digital Wallet", 40, 80);
-
-        // CHIP
+      
         ctx.fillStyle = d.chipColor;
         ctx.fillRect(40, 160, 120, 80);
         ctx.strokeStyle = "#8d7d47";
@@ -102,40 +97,34 @@ module.exports = {
         ctx.moveTo(40, 190); ctx.lineTo(160, 190);
         ctx.moveTo(40, 210); ctx.lineTo(160, 210);
         ctx.stroke();
-
-        // Card Number
-        ctx.font = "42px monospace"; // smaller
+      
+        ctx.font = "42px monospace";
         ctx.fillStyle = "white";
         ctx.shadowColor = "rgba(0,0,0,0.6)";
         ctx.shadowBlur = 10;
         ctx.fillText(card.number, 40, 340);
         ctx.shadowBlur = 0;
-
-        // Username
+      
         ctx.font = "36px sans-serif";
         ctx.fillStyle = "#eeeeee";
         ctx.fillText(username.toUpperCase(), 40, 430);
-
-        // Expiry
+      
         ctx.font = "28px sans-serif";
         ctx.fillStyle = "#bbbbbb";
         ctx.fillText("VALID THRU", 600, 300);
         ctx.font = "44px monospace";
         ctx.fillStyle = "white";
         ctx.fillText(card.expiry, 600, 350);
-
-        // CVV
+      
         ctx.font = "26px sans-serif";
         ctx.fillStyle = "#dddddd";
         ctx.fillText("CVV: *** (Hidden)", 600, 430);
-
-        // Balance
+      
         ctx.font = "34px sans-serif";
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "right";
         ctx.fillText(`Balance: ${this.formatMoney(balance)} BDT`, 860, 470);
-
-        // Last Transaction
+      
         if (transactions.length) {
             const lastTx = transactions[transactions.length - 1];
             const typeSymbol = lastTx.type === "sent" ? "➡️" : "⬅️";
@@ -146,24 +135,21 @@ module.exports = {
             ctx.textAlign = "left";
             ctx.fillText(info, 40, 470);
         }
-
-        // Hologram
+      
         ctx.globalAlpha = 0.85;
         ctx.fillStyle = d.hologramColors[0];
         ctx.beginPath(); ctx.arc(750, 140, 35, 0, Math.PI*2); ctx.fill();
         ctx.fillStyle = d.hologramColors[1];
         ctx.beginPath(); ctx.arc(790, 140, 35, 0, Math.PI*2); ctx.fill();
         ctx.globalAlpha = 1;
-
-        // Save
+      
         const outputDir = path.join(__dirname, "cache");
         fs.mkdirSync(outputDir, { recursive: true });
         const filePath = path.join(outputDir, `${Date.now()}_card.png`);
         fs.writeFileSync(filePath, canvas.toBuffer());
         return filePath;
     },
-
-    // ------------------------ MAIN COMMAND ------------------------
+  
     async onStart({ message, args, usersData, event }) {
         const uid = event.senderID;
         const action = args[0]?.toLowerCase();
@@ -180,8 +166,7 @@ module.exports = {
                 savings: 0
             };
         const bank = data.data.bank;
-
-        // REGISTER
+      
         if (action === "register") {
             if (bank.registered) return message.reply("⚠️ You already have a bank account.");
             bank.registered = true;
@@ -190,22 +175,20 @@ module.exports = {
             await usersData.set(uid, { data: data.data });
 
             return message.reply(
-`🎉 REGISTRATION SUCCESSFUL!
+`✅ REGISTRATION SUCCESSFUL!
 🏦 Premium Digital Bank
-📋 Account No: ${bank.accountNumber}
+📈 Account No: ${bank.accountNumber}
 📅 Opened: ${bank.createdAt}`
             );
         }
 
         if (!bank.registered)
             return message.reply("❌ You don't have a bank account.\nUse: \`bank register\`");
-
-        // BALANCE
+      
         if (action === "balance") {
-            return message.reply(`💰 Your balance: **${this.formatMoney(bank.balance)} BDT**`);
+            return message.reply(`🪙 Your balance: **${this.formatMoney(bank.balance)} BDT**`);
         }
-
-        // CARD
+      
         if (action === "card") {
             if (!bank.card) {
                 bank.card = {
@@ -229,8 +212,7 @@ module.exports = {
                 attachment: fs.createReadStream(image),
             });
         }
-
-        // DEPOSIT
+      
         if (action === "deposit") {
             const amount = parseFloat(args[1]);
             if (isNaN(amount) || amount <= 0) return message.reply("❌ Enter a valid amount.");
@@ -239,8 +221,7 @@ module.exports = {
             await usersData.set(uid, { data: data.data });
             return message.reply(`✅ Deposited **${this.formatMoney(amount)} BDT**\n💰 New Balance: **${this.formatMoney(bank.balance)} BDT**`);
         }
-
-        // WITHDRAW
+      
         if (action === "withdraw") {
             const amount = parseFloat(args[1]);
             if (isNaN(amount) || amount <= 0) return message.reply("❌ Enter a valid amount.");
@@ -250,8 +231,7 @@ module.exports = {
             await usersData.set(uid, { data: data.data });
             return message.reply(`✅ Withdrew **${this.formatMoney(amount)} BDT**\n💰 New Balance: **${this.formatMoney(bank.balance)} BDT**`);
         }
-
-        // SEND
+      
         if (action === "send") {
             const target = args[1];
             const amount = parseFloat(args[2]);
@@ -270,10 +250,9 @@ module.exports = {
             await usersData.set(target, { data: targetData.data });
             return message.reply(`✅ Sent **${this.formatMoney(amount)} BDT** to ${targetData.name || "User"}.\n💰 New Balance: **${this.formatMoney(bank.balance)} BDT**`);
         }
-
-        // TRANSACTION HISTORY DISPLAY
+      
         if (action === "history") {
-            let historyText = "📜 TRANSACTION HISTORY\n━━━━━━━━━━━━━━━━━\n";
+            let historyText = "📝 TRANSACTION HISTORY\n━━━━━━━━━━━━━━━━━\n";
             if (!bank.transactions.length) {
                 historyText += "1. 📥 RECEIVED\n   +$0 | Invalid Date\n   ID: undefined\n";
             } else {
@@ -288,8 +267,7 @@ module.exports = {
             }
             return message.reply(historyText);
         }
-
-        // ACCOUNT INFORMATION
+      
         if (action === "account") {
             return message.reply(
 `💳 ACCOUNT INFORMATION
@@ -297,8 +275,8 @@ module.exports = {
 🏦 Premium Digital Bank
 ━━━━━━━━━━━━━━━━━
 👤 Holder: ${data.name || "User"}
-📋 Account: ${bank.accountNumber}
-💰 Balance: $${bank.balance}
+📈 Account: ${bank.accountNumber}
+💴 Balance: $${bank.balance}
 💎 Savings: $${bank.savings || 0}
 ━━━━━━━━━━━━━━━━━`
             );
