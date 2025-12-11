@@ -5,7 +5,7 @@ const { createCanvas } = require("canvas");
 module.exports = {
     config: {
         name: "bank",
-        version: "0.1.3",
+        version: "2.0-premium",
         author: "Azadx69x",
         role: 0,
         shortDescription: "Banking System",
