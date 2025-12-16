@@ -41,7 +41,7 @@ module.exports = {
     }
 
     if (balance < 100) {
-      return message.reply(`❌ coin নেই\n💵 আছে: ${balance}\n📝 দরকার: 100`);
+      return message.reply(`❌ Not enough coins\n💵 আছে: ${balance}\n📝 দরকার: 100`);
     }
 
     await usersData.set(senderID, { money: balance - 100 });
