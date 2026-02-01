@@ -61,7 +61,7 @@ Type bm show <command>.js to get the raw link.`
 `;
         });
 
-        text += `🗂️ Page ${page}/${totalPages} — Type ")bm list ${page + 1}" for next page.`;
+        text += `🗂️ Page ${page}/${totalPages} — Type "bm list ${page + 1}" for next page.`;
 
         return message.reply(text.trim());
       }
