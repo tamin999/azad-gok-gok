@@ -15,29 +15,31 @@ const path = defaultRequire("path");
 const readline = defaultRequire("readline");
 const fs = defaultRequire("fs-extra");
 const toptp = defaultRequire("totp-generator");
-const login = defaultRequire(`${process.cwd()}/fb-chat-api`);
+const { login } = require("@dongdev/fca-unofficial");
 const qr = new (defaultRequire("qrcode-reader"));
 const Canvas = defaultRequire("canvas");
 const https = defaultRequire("https");
 
 // Create axios instance with retry configuration
 const axiosInstance = axios.create({
-  timeout: 30000,
-  httpsAgent: new https.Agent({
-    keepAlive: true,
-    keepAliveMsecs: 1000,
-    maxSockets: 10,
-    timeout: 30000
-  })
+	timeout: 30000,
+	httpsAgent: new https.Agent({
+		keepAlive: true,
+		keepAliveMsecs: 1000,
+		maxSockets: 10,
+		timeout: 30000
+	})
 });
 
-async function getName(userID) {
+async function getName(userID, api) {
 	try {
-		const user = await axiosInstance.post(`https://www.facebook.com/api/graphql/?q=${`node(${userID}){name}`}`);
-		return user.data[userID]?.name || null;
+		if (api && typeof api.getUserInfo === 'function') {
+			const userInfo = await api.getUserInfo(userID);
+			return userInfo[userID]?.name || null;
+		}
+		return null;
 	}
 	catch (error) {
-		console.warn(`getName error for ${userID}:`, error.message);
 		return null;
 	}
 }
@@ -99,7 +101,7 @@ const title = maxWidth > 85 ?
 	titles[0] :
 	maxWidth > 36 ?
 		titles[1] :
-	titles[2];
+		titles[2];
 
 console.log(gradient("#ff416c", "#ff4b2b")(createLine(null, true)));
 console.log();
@@ -637,7 +639,7 @@ async function safeGetUserName(userID, api, usersData = null) {
 	
 	// Try original getName function
 	try {
-		const name = await getName(userID);
+		const name = await getName(userID, api);
 		if (name) {
 			return name;
 		}
@@ -897,7 +899,7 @@ async function startBot(loginWithEmail) {
 								await sleep(3000);
 								
 								// Restart listening
-								global.GoatBot.Listening = api.listenMqtt(callBackListen);
+								global.GoatBot.Listening = api.listenMqtt(createCallBackListen());
 								console.log("[AUTO-RECONNECT] Listening restarted successfully");
 								reconnectAttempts = 0;
 							} catch (reconnectError) {
