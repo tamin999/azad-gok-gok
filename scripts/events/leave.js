@@ -1,98 +1,55 @@
-const { getTime, drive } = global.utils;
+const axios = require("axios");
 
 module.exports = {
-	config: {
-		name: "leave",
-		version: "1.4",
-		author: "NTKhang",
-		category: "events"
-	},
+  config: {
+    name: "leave",
+    version: "2.2",
+    author: "Arijit",
+    category: "events"
+  },
 
-	langs: {
-		vi: {
-			session1: "sáng",
-			session2: "trưa",
-			session3: "chiều",
-			session4: "tối",
-			leaveType1: "tự rời",
-			leaveType2: "bị kick",
-			defaultLeaveMessage: "{userName} đã {type} khỏi nhóm"
-		},
-		en: {
-			session1: "morning",
-			session2: "noon",
-			session3: "afternoon",
-			session4: "evening",
-			leaveType1: "left",
-			leaveType2: "was kicked from",
-			defaultLeaveMessage: "{userName} {type} the group"
-		}
-	},
+  onStart: async ({ threadsData, message, event, api, usersData }) => {
+    // ✅ কাজ করবে শুধু যখন কেউ লিভ নেবে
+    if (event.logMessageType !== "log:unsubscribe") return;
 
-	onStart: async ({ threadsData, message, event, api, usersData, getLang }) => {
-		if (event.logMessageType == "log:unsubscribe")
-			return async function () {
-				const { threadID } = event;
-				const threadData = await threadsData.get(threadID);
-				if (!threadData.settings.sendLeaveMessage)
-					return;
-				const { leftParticipantFbId } = event.logMessageData;
-				if (leftParticipantFbId == api.getCurrentUserID())
-					return;
-				const hours = getTime("HH");
+    const { threadID } = event;
+    const threadData = await threadsData.get(threadID);
+    if (!threadData?.settings?.sendLeaveMessage) return;
 
-				const threadName = threadData.threadName;
-				const userName = await usersData.getName(leftParticipantFbId);
+    const { leftParticipantFbId } = event.logMessageData;
 
-				// {userName}   : name of the user who left the group
-				// {type}       : type of the message (leave)
-				// {boxName}    : name of the box
-				// {threadName} : name of the box
-				// {time}       : time
-				// {session}    : session
+    // যদি বট নিজে লিভ নেয়, তখন কোনো মেসেজ পাঠাবে না
+    if (leftParticipantFbId == api.getCurrentUserID()) return;
 
-				let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
-				const form = {
-					mentions: leaveMessage.match(/\{userNameTag\}/g) ? [{
-						tag: userName,
-						id: leftParticipantFbId
-					}] : null
-				};
+    const userName = await usersData.getName(leftParticipantFbId);
 
-				leaveMessage = leaveMessage
-					.replace(/\{userName\}|\{userNameTag\}/g, userName)
-					.replace(/\{type\}/g, leftParticipantFbId == event.author ? getLang("leaveType1") : getLang("leaveType2"))
-					.replace(/\{threadName\}|\{boxName\}/g, threadName)
-					.replace(/\{time\}/g, hours)
-					.replace(/\{session\}/g, hours <= 10 ?
-						getLang("session1") :
-						hours <= 12 ?
-							getLang("session2") :
-							hours <= 18 ?
-								getLang("session3") :
-								getLang("session4")
-					);
+    // ✅ শুধুমাত্র সে নিজে লিভ নিলে কাজ করবে, কিক করলে কাজ করবে না
+    const isSelfLeave = leftParticipantFbId == event.author;
+    if (!isSelfLeave) return;
 
-				form.body = leaveMessage;
+    const text = `👉 ${userName} গ্রুপে থাকার যোগ্যতা নেই দেখে লিভ নিয়েছে 🤣`;
 
-				if (leaveMessage.includes("{userNameTag}")) {
-					form.mentions = [{
-						id: leftParticipantFbId,
-						tag: userName
-					}];
-				}
+    // ✅ তোমার GIF লিঙ্ক
+    const gifUrl = "https://i.postimg.cc/DZLhjf5r/VID-20250826-WA0002.gif";
 
-				if (threadData.data.leaveAttachment) {
-					const files = threadData.data.leaveAttachment;
-					const attachments = files.reduce((acc, file) => {
-						acc.push(drive.getFile(file, "stream"));
-						return acc;
-					}, []);
-					form.attachment = (await Promise.allSettled(attachments))
-						.filter(({ status }) => status == "fulfilled")
-						.map(({ value }) => value);
-				}
-				message.send(form);
-			};
-	}
+    let gifStream = null;
+    try {
+      const response = await axios.get(gifUrl, { responseType: "stream" });
+      gifStream = response.data;
+    } catch (e) {
+      console.error("GIF download error:", e.message);
+    }
+
+    const form = {
+      body: text,
+      mentions: [{ tag: userName, id: leftParticipantFbId }],
+      attachment: gifStream || undefined
+    };
+
+    await message.send(form);
+
+    if (!gifStream) {
+      await message.send("⚠ GIF ডাউনলোড করা যায়নি। লিঙ্ক ঠিক আছে কিনা দেখে নাও।");
+    }
+  }
 };
