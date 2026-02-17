@@ -187,7 +187,7 @@ module.exports = {
         cfg.aliases.map(a => `${prefix}${a}`).join(", ") : 
         "❌ 𝗡𝗼𝗻𝗲";
 
-      const helpMessage = `┍━━━[ 📚 𝗫𝟲𝟵𝗫 𝗕𝗢𝗧 𝗛𝗘𝗟𝗣 ]━━━◊
+      const helpMessage = `┍━━━[ 📚 HINATA BOT 𝗛𝗘𝗟𝗣 ]━━━◊
 ┋➥ 📛 𝗡𝗮𝗺𝗲: ${prefix}${cfg.name}
 ┋➥ 🗂️ 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${categoryEmoji(cfg.category || "other")} ${cfg.category || "❌ 𝗨𝗻𝗰𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝘇𝗲𝗱"}
 ┋➥ 📄 𝗗𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻: ${desc}
@@ -225,7 +225,7 @@ ${usage.split('\n').map(line => `┋➥ ${line}`).join('\n')}
       categories[cat].push(c.config.name);
     }
 
-    let msg = `┍━━━[ 📚 𝗫𝟲𝟵𝗫 𝗕𝗢𝗧 𝗠𝗘𝗡𝗨  ]━━━◊\n`;
+    let msg = `┍━━━[ 📚 HINATA 𝗕𝗢𝗧 𝗠𝗘𝗡𝗨  ]━━━◊\n`;
       
     const sortedCategories = Object.keys(categories).sort();
     
@@ -255,9 +255,9 @@ ${usage.split('\n').map(line => `┋➥ ${line}`).join('\n')}
 ┋➥ 𝗧𝗼𝘁𝗮𝗹 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝗲𝘀: ${sortedCategories.length}
 ┋➥ 𝗔𝗹𝗹 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀 𝗶𝗻 𝗼𝗻𝗲 𝗽𝗮𝗴𝗲
 ┍━━━[ 🚀 𝗜𝗡𝗙𝗢 ]━━━◊
-┋➥ 𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝗫𝟲𝟵𝗫 𝗕𝗼𝘁!
+┋➥ 𝗪𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 HINATA 𝗕𝗼𝘁!
 ┋➥ 𝗣𝗿𝗲𝗳𝗶𝘅: [ ${prefix} ]
-┋➥ 𝗗𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗿: 𝗔𝘇𝗮𝗱𝘅𝟲𝟵𝘅
+┋➥ 𝗗𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗿: TAMIM
 ┋➥ 𝗨𝘀𝗲: ${prefix}𝗵𝗲𝗹𝗽 <𝗰𝗼𝗺𝗺𝗮𝗻𝗱>
 ┕━━━━━━━━━━━━━━━━━━━━━━◊`;
       
