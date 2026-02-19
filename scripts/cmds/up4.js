@@ -66,7 +66,7 @@ module.exports = {
 
       return `
 ╔═════════════════════╗
-║        ⚡ X69X BOT SYSTEM ⚡
+║        ⚡ HINATA BOT SYSTEM ⚡
 ╠═════════════════════╣
 ║ ⏳ Uptime   : ${d}d ${h}h ${m}m ${s}s
 ║ 📅 Date     : ${date}
