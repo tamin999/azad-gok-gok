@@ -30,7 +30,7 @@ module.exports = {
 
       const ping = Date.now() - event.timestamp;
       const cpuUsage = os.loadavg()[0].toFixed(2);
-      const owner = "Azadx69x";
+      const owner = "Tamim";
       
       const canvas = Canvas.createCanvas(1000, 500);
       const ctx = canvas.getContext("2d");
