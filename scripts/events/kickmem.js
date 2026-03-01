@@ -27,7 +27,7 @@ module.exports = {
     const text = `👉 ${userName} গ্রুপে থাকার যোগ্যতা নেই দেখে kick খেয়েছে 🤣`;
 
     // ✅ তোমার নতুন PostImage GIF লিঙ্ক
-    const gifUrl = "https://i.postimg.cc/sDFQg1tr/VID-20250826-WA0001.gif";
+    const gifUrl = "https://i.imgur.com/SZjIVll.gif";
 
     try {
       const response = await axios.get(gifUrl, { responseType: "stream" });
